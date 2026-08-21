@@ -44,12 +44,14 @@ from src.probability import (  # noqa: E402
 
 
 def _save_figure(figure, path: Path) -> Path:
+    """Save one figure as a PNG, close it, and return its destination path."""
     figure.savefig(path, dpi=150, bbox_inches="tight")
     plt.close(figure)
     return path
 
 
 def _sample_grayscale_image() -> np.ndarray:
+    """Return the deterministic grayscale image used for SVD reconstruction."""
     rng = np.random.default_rng(42)
     coordinates = np.linspace(-1.0, 1.0, 128)
     x_grid, y_grid = np.meshgrid(coordinates, coordinates)

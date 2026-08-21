@@ -9,6 +9,7 @@ from matplotlib.figure import Figure
 
 
 def _as_vector(value: np.ndarray, name: str) -> np.ndarray:
+    """Convert ``value`` to a finite, non-empty one-dimensional float array."""
     array = np.asarray(value, dtype=float)
     if array.ndim != 1 or array.size == 0:
         raise ValueError(f"{name} must be a non-empty one-dimensional vector")
