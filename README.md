@@ -2,6 +2,49 @@
 
 NumPy로 AI 학습의 수학적 기반을 직접 계산하고 Matplotlib으로 시각화한 실습 프로젝트입니다. 선형변환과 행렬 분해, 수치미분, 연쇄 법칙 기반 역전파, Gradient Descent, 확률분포와 손실 함수의 MLE 해석을 다룹니다.
 
+## 한눈에 보는 학습 지도
+
+이 프로젝트는 **데이터와 파라미터를 표현하고, 예측 오차를 측정한 뒤, gradient로 파라미터를 개선하는 과정**을 하나의 학습 루프로 연결합니다.
+
+```mermaid
+flowchart LR
+    subgraph foundations ["표현과 판단의 기반"]
+        linear["선형대수"] --> representation["벡터·행렬 표현"]
+        probability["확률분포"] --> objective["손실과 MLE"]
+    end
+
+    subgraph learningLoop ["모델 학습 루프"]
+        forward["순전파"] --> loss["손실 계산"]
+        loss --> gradient["미분·역전파"]
+        gradient --> update["GD·Momentum"]
+        update --> forward
+    end
+
+    subgraph evidence ["실험과 검증 증거"]
+        linearEvidence["변환·Power Iteration·SVD"]
+        calculusEvidence["중심차분·Gradient field"]
+        backpropEvidence["2-2-1 수동·NumPy 비교"]
+        optimizerEvidence["수렴·발산·경로 비교"]
+        probabilityEvidence["분포·Softmax·MLE"]
+    end
+
+    representation --> forward
+    objective --> loss
+    linear -.-> linearEvidence
+    gradient -.-> calculusEvidence
+    gradient -.-> backpropEvidence
+    update -.-> optimizerEvidence
+    probability -.-> probabilityEvidence
+```
+
+| 인지적 질문 | 연결되는 개념 | 이 프로젝트에서 확인하는 것 |
+|---|---|---|
+| 무엇으로 표현하는가? | 벡터, 행렬, 선형변환, 고유값, SVD | 공간 변환, 주 고유쌍, 저랭크 복원 |
+| 오차의 변화는 어떻게 아는가? | 수치미분, gradient, 연쇄 법칙 | 중심차분 정확도, gradient 방향, 역전파 shape |
+| 파라미터를 어떻게 개선하는가? | Vanilla GD, Momentum | 학습률별 수렴·발산과 최적화 경로 |
+| 어떤 기준으로 예측을 평가하는가? | 확률분포, MLE, MSE, Cross-Entropy | 분포-손실 연결과 안정적 Softmax |
+| 결과를 어떻게 믿을 수 있는가? | 기준 계산, 수치 오차, 테스트, 시각화 | NumPy 기준값 비교, 재현 로그, PNG 산출물 |
+
 ## 주요 결과
 
 | 항목 | 검증 결과 |
