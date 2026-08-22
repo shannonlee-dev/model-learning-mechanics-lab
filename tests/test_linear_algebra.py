@@ -8,6 +8,7 @@ from src.linear_algebra import (
     area_scale_error,
     compress_image_svd,
     plot_matrix_transform,
+    power_iteration_comparison,
     plot_svd_reconstructions,
     power_iteration,
     rotation_matrix,
@@ -74,6 +75,18 @@ def test_power_iteration_matches_dominant_numpy_eigenpair():
     assert value == pytest.approx(reference_values[index], rel=0.05)
     assert abs(vector @ reference_vectors[:, index]) == pytest.approx(1.0, abs=1e-5)
     assert 1 <= iterations <= 1000
+
+
+def test_power_iteration_comparison_reports_numpy_reference_and_small_errors():
+    """The submitted comparison must expose eig's reference pair and errors."""
+    matrix = np.array([[4.0, 1.0], [1.0, 3.0]])
+    comparison = power_iteration_comparison(matrix, initial_vector=np.array([1.0, 1.0]))
+
+    assert comparison["power_eigenvalue"] == pytest.approx(comparison["reference_eigenvalue"])
+    assert comparison["eigenvalue_absolute_error"] < 1e-8
+    assert comparison["eigenvector_alignment"] == pytest.approx(1.0, abs=1e-8)
+    assert comparison["eigenvector_l2_error"] < 1e-8
+    assert comparison["iterations"] >= 1
 
 
 def test_power_iteration_rejects_zero_initial_vector():

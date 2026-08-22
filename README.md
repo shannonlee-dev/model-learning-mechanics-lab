@@ -65,7 +65,22 @@ jupyter nbconvert --to notebook --execute --inplace notebooks/probability_loss.i
 
 점 집합은 `(2, n)` 열벡터로 표현합니다. 회전, 스케일, 전단 행렬을 단위 원에 적용하고 변환 전후를 겹쳐 그립니다. 신발끈 공식으로 구한 면적비와 $|\det(A)|$를 비교합니다.
 
-Power Iteration은 매 반복마다 $Av$를 정규화하고 Rayleigh quotient $v^TAv$로 최대 고유값을 추정합니다. `np.linalg.eig`는 테스트의 기준값 계산에만 사용합니다.
+Power Iteration은 매 반복마다 $Av$를 정규화하고 Rayleigh quotient $v^TAv$로 최대 고유값을 추정합니다. 아래 재현 스크립트는 `np.linalg.eig`로 기준 고유쌍을 별도로 계산하고, 고유값 절대오차와 부호 불변 고유벡터 정렬도/L2 오차를 출력합니다.
+
+```text
+$ MPLBACKEND=Agg python3 scripts/generate_outputs.py
+...
+Power Iteration vs np.linalg.eig
+matrix = [[4.0, 1.0], [1.0, 3.0]]
+power eigenvalue     = 4.618033988750
+numpy eig eigenvalue = 4.618033988750
+eigenvalue abs error = 8.882e-16
+power eigenvector     = [0.85065081 0.52573111]
+numpy eig eigenvector = [0.85065081 0.52573111]
+eigenvector alignment = 1.000000000000
+eigenvector L2 error  = 5.590e-10
+iterations            = 30
+```
 
 SVD 압축은 $A\approx U_k\Sigma_kV_k^T$로 복원합니다. 명시된 `k=100`을 실험하려면 최소 한 변의 길이가 100 이상이어야 하므로, 참고 가이드의 64×64 대신 결정론적으로 생성한 128×128 grayscale 이미지를 사용합니다.
 

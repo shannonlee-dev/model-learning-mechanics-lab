@@ -1,6 +1,6 @@
 """Linear transformations, eigenvalue estimation, and SVD compression."""
 
-from typing import Optional, Sequence, Tuple
+from typing import Dict, Optional, Sequence, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -165,6 +165,43 @@ def power_iteration(
             eigenvalue = float(vector @ matrix_array @ vector)
             return eigenvalue, vector, iteration
     raise RuntimeError("power iteration did not converge within max_iterations")
+
+
+def power_iteration_comparison(
+    matrix: np.ndarray,
+    initial_vector: Optional[np.ndarray] = None,
+    max_iterations: int = 1000,
+    tolerance: float = 1e-9,
+) -> Dict[str, object]:
+    """Compare Power Iteration's dominant eigenpair against ``np.linalg.eig``.
+
+    Eigenvectors are sign-invariant, so the reported L2 error aligns the
+    reference vector's sign with the Power Iteration vector first.
+    """
+    power_value, power_vector, iterations = power_iteration(
+        matrix,
+        initial_vector=initial_vector,
+        max_iterations=max_iterations,
+        tolerance=tolerance,
+    )
+    reference_values, reference_vectors = np.linalg.eig(np.asarray(matrix, dtype=float))
+    index = int(np.argmax(np.abs(reference_values)))
+    reference_value = float(np.real_if_close(reference_values[index]))
+    reference_vector = np.asarray(np.real_if_close(reference_vectors[:, index]), dtype=float)
+    reference_vector /= np.linalg.norm(reference_vector)
+    if power_vector @ reference_vector < 0.0:
+        reference_vector = -reference_vector
+
+    return {
+        "power_eigenvalue": power_value,
+        "power_eigenvector": power_vector,
+        "reference_eigenvalue": reference_value,
+        "reference_eigenvector": reference_vector,
+        "eigenvalue_absolute_error": abs(power_value - reference_value),
+        "eigenvector_alignment": abs(float(power_vector @ reference_vector)),
+        "eigenvector_l2_error": float(np.linalg.norm(power_vector - reference_vector)),
+        "iterations": iterations,
+    }
 
 
 def compress_image_svd(image: np.ndarray, k: int) -> np.ndarray:
