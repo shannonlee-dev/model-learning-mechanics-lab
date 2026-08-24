@@ -75,13 +75,17 @@ def plot_gradient_field(
     sample_points: Optional[np.ndarray] = None,
 ) -> Tuple[Figure, Axes]:
     """선택한 점에서 2차원 등고선과 정규화한 그래디언트 화살표를 그립니다."""
+    # -4부터 4까지 0.05 간격으로 나눈 좌표를 생성합니다.
     coordinates = np.linspace(-4.0, 4.0, 161)
+    # 모든 x-y 좌표 조합으로 2차원 격자를 만듭니다.
     x_grid, y_grid = np.meshgrid(coordinates, coordinates)
+    # 격자 전체에서 함수값을 계산해 등고선의 높이값으로 사용합니다.
     z_grid = np.asarray(function(x_grid, y_grid), dtype=float)
     if z_grid.shape != x_grid.shape or not np.isfinite(z_grid).all():
         raise ValueError("function must return a finite value for every grid point")
 
     if sample_points is None:
+        # 화살표를 표시할 기본 좌표 다섯 개입니다.
         samples = np.array(
             [
                 [-3.0, -2.0],
@@ -92,23 +96,31 @@ def plot_gradient_field(
             ]
         )
     else:
+        # 사용자가 지정한 좌표를 실수 배열로 변환합니다.
         samples = np.asarray(sample_points, dtype=float)
     if samples.ndim != 2 or samples.shape[1] != 2 or samples.shape[0] == 0:
         raise ValueError("sample_points must have shape (n, 2) with n > 0")
     if not np.isfinite(samples).all():
         raise ValueError("sample_points must contain only finite values")
 
+    # 각 좌표에서 그래디언트 [∂f/∂x, ∂f/∂y]를 계산해 (n, 2) 배열로 쌓습니다.
     vectors = np.vstack([np.asarray(gradient(point), dtype=float) for point in samples])
     if vectors.shape != samples.shape or not np.isfinite(vectors).all():
         raise ValueError("gradient must return one finite vector with shape (2,)")
+    # 화살표의 크기 대신 방향만 보여 주기 위해 각 벡터 길이를 구합니다.
     lengths = np.linalg.norm(vectors, axis=1, keepdims=True)
     if np.any(lengths == 0.0):
         raise ValueError("gradient arrows require non-zero vectors")
+    # 모든 벡터의 길이를 1로 정규화해 방향 벡터를 만듭니다.
     directions = vectors / lengths
 
+    # Figure와 좌표축을 생성합니다.
     figure, axes = plt.subplots(figsize=(7, 6))
+    # 함수값이 같은 지점을 연결한 등고선을 16개 그립니다.
     contours = axes.contour(x_grid, y_grid, z_grid, levels=16, cmap="viridis")
+    # 각 등고선에 해당 함수값 라벨을 표시합니다.
     axes.clabel(contours, inline=True, fontsize=8)
+    # 선택한 점에서 정규화한 그래디언트 방향을 빨간 화살표로 표시합니다.
     axes.quiver(
         samples[:, 0],
         samples[:, 1],
@@ -121,7 +133,9 @@ def plot_gradient_field(
         width=0.008,
         label="Gradient direction",
     )
+    # 화살표가 시작하는 좌표를 검은 점으로 함께 표시합니다.
     axes.scatter(samples[:, 0], samples[:, 1], color="black", s=22, zorder=3)
+    # x축과 y축의 실제 길이 비율을 같게 유지합니다.
     axes.set_aspect("equal", adjustable="box")
     axes.set_xlabel("x")
     axes.set_ylabel("y")
