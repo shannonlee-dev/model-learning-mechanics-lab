@@ -1,4 +1,4 @@
-"""Regenerate every submitted visualization with deterministic inputs."""
+"""결정론적 입력으로 제출한 모든 시각화를 다시 생성합니다."""
 
 import os
 import sys
@@ -46,14 +46,14 @@ from src.probability import (  # noqa: E402
 
 
 def _save_figure(figure, path: Path) -> Path:
-    """Save one figure as a PNG, close it, and return its destination path."""
+    """Figure 하나를 PNG로 저장하고 닫은 뒤 저장 경로를 반환합니다."""
     figure.savefig(path, dpi=150, bbox_inches="tight")
     plt.close(figure)
     return path
 
 
 def load_svd_source_image() -> np.ndarray:
-    """Load the submitted SVD source image as a normalized grayscale array."""
+    """제출한 SVD 원본 이미지를 정규화한 grayscale 배열로 불러옵니다."""
     image = np.asarray(plt.imread(SVD_SOURCE_IMAGE), dtype=float)
     if image.ndim == 2:
         grayscale = image
@@ -67,7 +67,7 @@ def load_svd_source_image() -> np.ndarray:
 
 
 def generate_all_outputs(output_directory: Path) -> List[Path]:
-    """Generate and save the ten deterministic PNG results required by the lab."""
+    """실습에 필요한 결정론적 PNG 결과 열 개를 생성하고 저장합니다."""
     np.random.seed(42)
     destination = Path(output_directory)
     destination.mkdir(parents=True, exist_ok=True)
@@ -166,7 +166,7 @@ def generate_all_outputs(output_directory: Path) -> List[Path]:
 
 
 def print_power_iteration_comparison() -> None:
-    """Print the reproducible Power Iteration versus NumPy eig comparison."""
+    """재현 가능한 Power Iteration과 NumPy eig 비교 결과를 출력합니다."""
     matrix = np.array([[4.0, 1.0], [1.0, 3.0]])
     comparison = power_iteration_comparison(
         matrix,

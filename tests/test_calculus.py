@@ -1,4 +1,4 @@
-"""Tests for numerical differentiation and gradient visualization."""
+"""수치 미분과 그래디언트 시각화 테스트입니다."""
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -14,7 +14,7 @@ from src.calculus import (
 
 
 def test_central_difference_matches_square_derivative_at_three():
-    """Changing the central-difference formula must miss the derivative six."""
+    """중심차분 공식을 바꾸면 도함수 값 6을 놓쳐야 합니다."""
     assert central_difference(lambda value: value**2, 3.0) == pytest.approx(
         6.0,
         abs=1e-4,
@@ -22,7 +22,7 @@ def test_central_difference_matches_square_derivative_at_three():
 
 
 def test_numerical_gradient_matches_quadratic_gradient():
-    """Skipping either coordinate must break the known bowl gradient."""
+    """어느 한 좌표라도 생략하면 알려진 이차 함수 그래디언트와 달라져야 합니다."""
     point = np.array([2.0, -3.0])
     np.testing.assert_allclose(
         numerical_gradient(lambda p: p[0] ** 2 + p[1] ** 2, point),
@@ -32,7 +32,7 @@ def test_numerical_gradient_matches_quadratic_gradient():
 
 
 def test_gradient_is_perpendicular_to_contour_tangent():
-    """A wrong analytical gradient must lose contour perpendicularity."""
+    """해석적 그래디언트가 틀리면 등고선 접선과의 수직성을 잃어야 합니다."""
     gradient = quadratic_bowl_gradient(np.array([2.0, 1.0]))
     tangent = np.array([-gradient[1], gradient[0]])
     assert gradient @ tangent == pytest.approx(0.0, abs=1e-12)
@@ -46,13 +46,13 @@ def test_gradient_is_perpendicular_to_contour_tangent():
     ],
 )
 def test_differentiation_rejects_invalid_parameters(call):
-    """Invalid steps and empty points must not produce plausible numbers."""
+    """잘못된 간격과 빈 점은 그럴듯한 수치를 만들면 안 됩니다."""
     with pytest.raises(ValueError):
         call()
 
 
 def test_gradient_plot_contains_contours_and_vector_field():
-    """Removing contours or arrows must break the visualization contract."""
+    """등고선이나 화살표를 제거하면 시각화 조건이 깨져야 합니다."""
     figure, axes = plot_gradient_field()
     assert axes.collections
     assert axes.get_aspect() in (1.0, "equal")
@@ -61,7 +61,7 @@ def test_gradient_plot_contains_contours_and_vector_field():
 
 
 def test_quadratic_bowl_supports_mesh_arrays():
-    """Breaking vectorization must prevent contour-grid evaluation."""
+    """벡터화가 깨지면 등고선 격자 계산이 실패해야 합니다."""
     x_values = np.array([[0.0, 1.0]])
     y_values = np.array([[2.0, 3.0]])
     np.testing.assert_allclose(quadratic_bowl(x_values, y_values), [[4.0, 10.0]])

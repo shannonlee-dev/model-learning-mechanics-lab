@@ -1,4 +1,4 @@
-"""Probability distributions, stable Softmax, and comparison plots."""
+"""확률분포, 수치적으로 안정적인 Softmax, 비교 시각화 기능을 제공합니다."""
 
 from typing import Tuple
 
@@ -13,7 +13,7 @@ def normal_pdf(
     mean: float = 0.0,
     std: float = 1.0,
 ) -> np.ndarray:
-    """Evaluate the normal density ``exp(-z²/2)/(std*sqrt(2π))``."""
+    """정규분포 밀도 ``exp(-z²/2)/(std*sqrt(2π))``를 계산합니다."""
     if std <= 0 or not np.isfinite(std):
         raise ValueError("std must be a positive finite number")
     if not np.isfinite(mean):
@@ -26,7 +26,7 @@ def normal_pdf(
 
 
 def bernoulli_pmf(outcomes: np.ndarray, probability: float) -> np.ndarray:
-    """Evaluate ``p^x * (1-p)^(1-x)`` for binary outcomes zero or one."""
+    """0 또는 1인 이진 결과에 대해 ``p^x * (1-p)^(1-x)``를 계산합니다."""
     if probability < 0 or probability > 1 or not np.isfinite(probability):
         raise ValueError("probability must be finite and lie in [0, 1]")
     outcome_array = np.asarray(outcomes, dtype=float)
@@ -38,7 +38,7 @@ def bernoulli_pmf(outcomes: np.ndarray, probability: float) -> np.ndarray:
 
 
 def softmax(logits: np.ndarray) -> np.ndarray:
-    """Normalize one logit vector after subtracting its maximum for stability."""
+    """수치 안정을 위해 최댓값을 뺀 logit 벡터를 정규화합니다."""
     logit_array = np.asarray(logits, dtype=float)
     if logit_array.ndim != 1 or logit_array.size == 0:
         raise ValueError("logits must be a non-empty one-dimensional vector")
@@ -50,7 +50,7 @@ def softmax(logits: np.ndarray) -> np.ndarray:
 
 
 def plot_normal_distributions() -> Tuple[Figure, Axes]:
-    """Plot the PDFs of ``N(0,1)`` and ``N(2,0.5)`` on one figure."""
+    """하나의 Figure에 ``N(0,1)``과 ``N(2,0.5)``의 PDF를 그립니다."""
     x_values = np.linspace(-4.0, 4.5, 500)
     figure, axes = plt.subplots(figsize=(7, 5))
     axes.plot(x_values, normal_pdf(x_values, 0.0, 1.0), label="N(0, 1)")
@@ -65,7 +65,7 @@ def plot_normal_distributions() -> Tuple[Figure, Axes]:
 
 
 def plot_bernoulli_distributions() -> Tuple[Figure, Axes]:
-    """Plot the PMFs of ``B(0.3)`` and ``B(0.7)`` on one figure."""
+    """하나의 Figure에 ``B(0.3)``과 ``B(0.7)``의 PMF를 그립니다."""
     outcomes = np.array([0, 1])
     width = 0.34
     figure, axes = plt.subplots(figsize=(6, 5))

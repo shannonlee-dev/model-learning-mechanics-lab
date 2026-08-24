@@ -1,4 +1,4 @@
-"""Linear transformations, eigenvalue estimation, and SVD compression."""
+"""선형 변환, 고유값 추정, SVD 압축 기능을 제공합니다."""
 
 from typing import Dict, Optional, Sequence, Tuple
 
@@ -9,7 +9,7 @@ from matplotlib.figure import Figure
 
 
 def unit_circle(num_points: int = 361) -> np.ndarray:
-    """Return evenly sampled unit-circle points with shape ``(2, n)``."""
+    """``(2, n)`` 형태로 균등 표본화한 단위 원의 점들을 반환합니다."""
     if not isinstance(num_points, int) or num_points < 3:
         raise ValueError("num_points must be an integer of at least 3")
     angles = np.linspace(0.0, 2.0 * np.pi, num_points)
@@ -17,23 +17,23 @@ def unit_circle(num_points: int = 361) -> np.ndarray:
 
 
 def rotation_matrix(theta: float) -> np.ndarray:
-    """Return the 2D counter-clockwise rotation matrix ``R(theta)``."""
+    """2차원 반시계 방향 회전 행렬 ``R(theta)``를 반환합니다."""
     cosine, sine = np.cos(theta), np.sin(theta)
     return np.array([[cosine, -sine], [sine, cosine]], dtype=float)
 
 
 def scaling_matrix(sx: float, sy: float) -> np.ndarray:
-    """Return the 2D scaling matrix ``diag(sx, sy)``."""
+    """2차원 스케일링 행렬 ``diag(sx, sy)``를 반환합니다."""
     return np.array([[sx, 0.0], [0.0, sy]], dtype=float)
 
 
 def shear_matrix(k: float) -> np.ndarray:
-    """Return the horizontal shear matrix ``[[1, k], [0, 1]]``."""
+    """수평 전단 행렬 ``[[1, k], [0, 1]]``를 반환합니다."""
     return np.array([[1.0, k], [0.0, 1.0]], dtype=float)
 
 
 def transform_points(matrix: np.ndarray, points: np.ndarray) -> np.ndarray:
-    """Apply a 2×2 linear transformation to ``(2, n)`` point columns."""
+    """``(2, n)`` 형태의 점 열벡터에 2×2 선형 변환을 적용합니다."""
     matrix_array = np.asarray(matrix, dtype=float)
     point_array = np.asarray(points, dtype=float)
     if matrix_array.shape != (2, 2):
@@ -46,7 +46,7 @@ def transform_points(matrix: np.ndarray, points: np.ndarray) -> np.ndarray:
 
 
 def polygon_area(points: np.ndarray) -> float:
-    """Compute polygon area with the shoelace formula for ``(2, n)`` points."""
+    """``(2, n)`` 점에 대해 신발끈 공식으로 다각형 넓이를 계산합니다."""
     point_array = np.asarray(points, dtype=float)
     if point_array.ndim != 2 or point_array.shape[0] != 2 or point_array.shape[1] < 3:
         raise ValueError("points must have shape (2, n) with n >= 3")
@@ -64,7 +64,7 @@ def area_scale_error(
     matrix: np.ndarray,
     points: np.ndarray,
 ) -> Tuple[float, float, float]:
-    """Compare ``abs(det(A))`` with the transformed-to-original area ratio."""
+    """``abs(det(A))``와 변환 전후 넓이 비율을 비교합니다."""
     matrix_array = np.asarray(matrix, dtype=float)
     transformed = transform_points(matrix_array, points)
     original_area = polygon_area(points)
@@ -87,7 +87,7 @@ def plot_matrix_transform(
     points: Optional[np.ndarray] = None,
     ax: Optional[Axes] = None,
 ) -> Tuple[Figure, Axes]:
-    """Overlay original and transformed unit-circle points on one figure."""
+    """하나의 Figure에 원본과 변환한 단위 원 점을 겹쳐 그립니다."""
     point_array = unit_circle() if points is None else np.asarray(points, dtype=float)
     transformed = transform_points(matrix, point_array)
     if ax is None:
@@ -120,9 +120,9 @@ def power_iteration(
     max_iterations: int = 1000,
     tolerance: float = 1e-9,
 ) -> Tuple[float, np.ndarray, int]:
-    """Estimate the dominant eigenpair using normalized Power Iteration.
+    """정규화한 Power Iteration으로 주 고유쌍을 추정합니다.
 
-    The eigenvalue estimate is the Rayleigh quotient ``v.T @ A @ v``.
+    고유값 추정에는 Rayleigh quotient ``v.T @ A @ v``를 사용합니다.
     """
     matrix_array = np.asarray(matrix, dtype=float)
     if (
@@ -173,10 +173,10 @@ def power_iteration_comparison(
     max_iterations: int = 1000,
     tolerance: float = 1e-9,
 ) -> Dict[str, object]:
-    """Compare Power Iteration's dominant eigenpair against ``np.linalg.eig``.
+    """Power Iteration의 주 고유쌍을 ``np.linalg.eig``와 비교합니다.
 
-    Eigenvectors are sign-invariant, so the reported L2 error aligns the
-    reference vector's sign with the Power Iteration vector first.
+    고유벡터는 부호 불변이므로, 보고하는 L2 오차를 계산하기 전에 기준 벡터의
+    부호를 Power Iteration 벡터와 맞춥니다.
     """
     power_value, power_vector, iterations = power_iteration(
         matrix,
@@ -205,7 +205,7 @@ def power_iteration_comparison(
 
 
 def compress_image_svd(image: np.ndarray, k: int) -> np.ndarray:
-    """Reconstruct a grayscale image from its first ``k`` singular triplets."""
+    """처음 ``k``개의 특이 삼중항으로 grayscale 이미지를 복원합니다."""
     image_array = np.asarray(image, dtype=float)
     if image_array.ndim != 2 or image_array.size == 0:
         raise ValueError("image must be a non-empty 2D grayscale array")
@@ -226,7 +226,7 @@ def plot_svd_reconstructions(
     image: np.ndarray,
     ranks: Sequence[int] = (10, 50, 100),
 ) -> Tuple[Figure, np.ndarray]:
-    """Compare the original grayscale image with truncated-SVD reconstructions."""
+    """원본 grayscale 이미지와 절단 SVD 복원 결과를 비교합니다."""
     rank_values = tuple(ranks)
     if not rank_values:
         raise ValueError("ranks must contain at least one rank")

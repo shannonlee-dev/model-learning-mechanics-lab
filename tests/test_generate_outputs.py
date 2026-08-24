@@ -1,4 +1,4 @@
-"""End-to-end tests for reproducible result artifacts."""
+"""재현 가능한 결과 산출물에 대한 엔드투엔드 테스트입니다."""
 
 import numpy as np
 
@@ -20,7 +20,7 @@ EXPECTED_OUTPUTS = {
 
 
 def test_generate_all_outputs_creates_nonempty_pngs(tmp_path):
-    """Skipping or corrupting any figure must break the artifact contract."""
+    """Figure를 누락하거나 훼손하면 산출물 조건이 깨져야 합니다."""
     paths = generate_all_outputs(tmp_path)
     assert {path.name for path in paths} == EXPECTED_OUTPUTS
     assert all(path.read_bytes().startswith(b"\x89PNG\r\n\x1a\n") for path in paths)
@@ -28,7 +28,7 @@ def test_generate_all_outputs_creates_nonempty_pngs(tmp_path):
 
 
 def test_svd_source_image_loads_the_uploaded_image_as_grayscale():
-    """Replacing the uploaded source with synthetic data must break this contract."""
+    """업로드한 원본을 합성 데이터로 바꾸면 이 조건이 깨져야 합니다."""
     image = load_svd_source_image()
 
     assert SVD_SOURCE_IMAGE.is_file()

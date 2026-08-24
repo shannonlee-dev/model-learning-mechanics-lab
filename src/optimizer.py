@@ -1,4 +1,4 @@
-"""Gradient-descent optimizers, quadratic objectives, and path plots."""
+"""경사하강법 옵티마이저, 이차 목적 함수, 경로 시각화 기능을 제공합니다."""
 
 from typing import Callable, Mapping, Optional, Tuple, Union
 
@@ -9,7 +9,7 @@ from matplotlib.figure import Figure
 
 
 def _as_vector(value: np.ndarray, name: str) -> np.ndarray:
-    """Convert ``value`` to a finite, non-empty one-dimensional float array."""
+    """``value``를 유한한 비어 있지 않은 1차원 실수 배열로 변환합니다."""
     array = np.asarray(value, dtype=float)
     if array.ndim != 1 or array.size == 0:
         raise ValueError(f"{name} must be a non-empty one-dimensional vector")
@@ -19,16 +19,16 @@ def _as_vector(value: np.ndarray, name: str) -> np.ndarray:
 
 
 class VanillaGD:
-    """Vanilla gradient descent with ``theta <- theta - lr * gradient``."""
+    """``theta <- theta - lr * gradient``를 사용하는 기본 경사하강법입니다."""
 
     def __init__(self, learning_rate: float) -> None:
-        """Create a gradient-descent optimizer with a positive learning rate."""
+        """양의 학습률을 사용하는 경사하강법 옵티마이저를 생성합니다."""
         if learning_rate <= 0 or not np.isfinite(learning_rate):
             raise ValueError("learning_rate must be a positive finite number")
         self.learning_rate = float(learning_rate)
 
     def update(self, parameters: np.ndarray, gradient: np.ndarray) -> np.ndarray:
-        """Return parameters after one vanilla gradient-descent step."""
+        """기본 경사하강법을 한 번 적용한 파라미터를 반환합니다."""
         parameter_array = _as_vector(parameters, "parameters")
         gradient_array = _as_vector(gradient, "gradient")
         if gradient_array.shape != parameter_array.shape:
@@ -37,10 +37,10 @@ class VanillaGD:
 
 
 class Momentum:
-    """Gradient descent with accumulated velocity ``v = beta*v + gradient``."""
+    """``v = beta*v + gradient``의 누적 속도를 사용하는 경사하강법입니다."""
 
     def __init__(self, learning_rate: float, beta: float = 0.9) -> None:
-        """Create Momentum with positive learning rate and ``0 <= beta < 1``."""
+        """양의 학습률과 ``0 <= beta < 1``을 사용하는 Momentum을 생성합니다."""
         if learning_rate <= 0 or not np.isfinite(learning_rate):
             raise ValueError("learning_rate must be a positive finite number")
         if beta < 0 or beta >= 1 or not np.isfinite(beta):
@@ -50,7 +50,7 @@ class Momentum:
         self.velocity: Optional[np.ndarray] = None
 
     def update(self, parameters: np.ndarray, gradient: np.ndarray) -> np.ndarray:
-        """Return parameters after one Momentum step and retain its velocity."""
+        """Momentum을 한 번 적용하고 속도를 유지한 파라미터를 반환합니다."""
         parameter_array = _as_vector(parameters, "parameters")
         gradient_array = _as_vector(gradient, "gradient")
         if gradient_array.shape != parameter_array.shape:
@@ -69,7 +69,7 @@ def optimize(
     optimizer: Union[VanillaGD, Momentum],
     steps: int,
 ) -> np.ndarray:
-    """Run an optimizer and return a path containing the initial point."""
+    """옵티마이저를 실행하고 초기점을 포함한 경로를 반환합니다."""
     if not isinstance(steps, int) or steps < 0:
         raise ValueError("steps must be a non-negative integer")
     current = _as_vector(initial_point, "initial_point").copy()
@@ -82,7 +82,7 @@ def optimize(
 
 
 def sphere(point: np.ndarray) -> Union[float, np.ndarray]:
-    """Evaluate ``f(x, y) = x² + y²`` at points ending in dimension two."""
+    """마지막 차원이 2인 점에서 ``f(x, y) = x² + y²``를 계산합니다."""
     point_array = np.asarray(point, dtype=float)
     if point_array.shape[-1:] != (2,) or not np.isfinite(point_array).all():
         raise ValueError("point must be finite and end with dimension 2")
@@ -91,7 +91,7 @@ def sphere(point: np.ndarray) -> Union[float, np.ndarray]:
 
 
 def sphere_gradient(point: np.ndarray) -> np.ndarray:
-    """Return ``[2x, 2y]``, the gradient of the radial quadratic."""
+    """방사형 이차 함수의 그래디언트 ``[2x, 2y]``를 반환합니다."""
     point_array = _as_vector(point, "point")
     if point_array.shape != (2,):
         raise ValueError("point must have shape (2,)")
@@ -99,7 +99,7 @@ def sphere_gradient(point: np.ndarray) -> np.ndarray:
 
 
 def elliptical(point: np.ndarray) -> Union[float, np.ndarray]:
-    """Evaluate ``f(x, y) = x² + 10y²`` at dimension-two points."""
+    """2차원 점에서 ``f(x, y) = x² + 10y²``를 계산합니다."""
     point_array = np.asarray(point, dtype=float)
     if point_array.shape[-1:] != (2,) or not np.isfinite(point_array).all():
         raise ValueError("point must be finite and end with dimension 2")
@@ -108,7 +108,7 @@ def elliptical(point: np.ndarray) -> Union[float, np.ndarray]:
 
 
 def elliptical_gradient(point: np.ndarray) -> np.ndarray:
-    """Return ``[2x, 20y]``, the gradient of the elliptical quadratic."""
+    """타원형 이차 함수의 그래디언트 ``[2x, 20y]``를 반환합니다."""
     point_array = _as_vector(point, "point")
     if point_array.shape != (2,):
         raise ValueError("point must have shape (2,)")
@@ -124,7 +124,7 @@ def plot_optimization_paths(
     levels: int = 24,
     ax: Optional[Axes] = None,
 ) -> Tuple[Figure, Axes]:
-    """Overlay named optimization paths on objective-function contours."""
+    """목적 함수 등고선 위에 이름이 지정된 최적화 경로를 겹쳐 그립니다."""
     if not paths:
         raise ValueError("paths must contain at least one named path")
     if levels <= 0:

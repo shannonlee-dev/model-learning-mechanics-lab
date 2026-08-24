@@ -1,1 +1,1 @@
-"""Mathematical learning mechanics implemented with NumPy."""
+"""NumPy로 구현한 AI 학습 수학 실습 모듈입니다."""

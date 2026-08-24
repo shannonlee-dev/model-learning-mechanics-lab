@@ -1,4 +1,4 @@
-"""Numerical differentiation and two-dimensional gradient visualization."""
+"""수치 미분과 2차원 그래디언트 시각화 기능을 제공합니다."""
 
 from typing import Callable, Optional, Tuple, Union
 
@@ -13,7 +13,7 @@ def central_difference(
     x: float,
     h: float = 1e-5,
 ) -> float:
-    """Approximate ``f'(x)`` with ``(f(x+h)-f(x-h))/(2h)``."""
+    """``(f(x+h)-f(x-h))/(2h)``로 ``f'(x)``를 근사합니다."""
     if h <= 0 or not np.isfinite(h):
         raise ValueError("h must be a positive finite number")
     result = (function(x + h) - function(x - h)) / (2.0 * h)
@@ -28,7 +28,7 @@ def numerical_gradient(
     point: np.ndarray,
     h: float = 1e-5,
 ) -> np.ndarray:
-    """Approximate a scalar function's gradient by coordinate-wise differences."""
+    """좌표별 중심차분으로 스칼라 함수의 그래디언트를 근사합니다."""
     if h <= 0 or not np.isfinite(h):
         raise ValueError("h must be a positive finite number")
     point_array = np.asarray(point, dtype=float)
@@ -57,12 +57,12 @@ def quadratic_bowl(
     x: Union[float, np.ndarray],
     y: Union[float, np.ndarray],
 ) -> Union[float, np.ndarray]:
-    """Evaluate the radial quadratic ``f(x, y) = x² + y²``."""
+    """방사형 이차 함수 ``f(x, y) = x² + y²``의 값을 계산합니다."""
     return np.asarray(x) ** 2 + np.asarray(y) ** 2
 
 
 def quadratic_bowl_gradient(point: np.ndarray) -> np.ndarray:
-    """Return the analytical gradient ``[2x, 2y]`` of the quadratic bowl."""
+    """이차 함수의 해석적 그래디언트 ``[2x, 2y]``를 반환합니다."""
     point_array = np.asarray(point, dtype=float)
     if point_array.shape != (2,) or not np.isfinite(point_array).all():
         raise ValueError("point must be a finite vector with shape (2,)")
@@ -74,7 +74,7 @@ def plot_gradient_field(
     gradient: Callable[[np.ndarray], np.ndarray] = quadratic_bowl_gradient,
     sample_points: Optional[np.ndarray] = None,
 ) -> Tuple[Figure, Axes]:
-    """Plot 2D contours and normalized gradient arrows at selected points."""
+    """선택한 점에서 2차원 등고선과 정규화한 그래디언트 화살표를 그립니다."""
     coordinates = np.linspace(-4.0, 4.0, 161)
     x_grid, y_grid = np.meshgrid(coordinates, coordinates)
     z_grid = np.asarray(function(x_grid, y_grid), dtype=float)
