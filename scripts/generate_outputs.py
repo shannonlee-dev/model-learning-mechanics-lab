@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import List
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+SVD_SOURCE_IMAGE = REPOSITORY_ROOT / "assets" / "images" / "svd_source.png"
 os.environ.setdefault(
     "MPLCONFIGDIR",
     str(Path(tempfile.gettempdir()) / "model-learning-mechanics-matplotlib"),
@@ -51,16 +52,18 @@ def _save_figure(figure, path: Path) -> Path:
     return path
 
 
-def _sample_grayscale_image() -> np.ndarray:
-    """Return the deterministic grayscale image used for SVD reconstruction."""
-    rng = np.random.default_rng(42)
-    coordinates = np.linspace(-1.0, 1.0, 128)
-    x_grid, y_grid = np.meshgrid(coordinates, coordinates)
-    radial = np.exp(-4.0 * (x_grid**2 + y_grid**2))
-    waves = 0.5 + 0.5 * np.sin(12.0 * x_grid) * np.cos(10.0 * y_grid)
-    square = ((abs(x_grid) < 0.42) & (abs(y_grid) < 0.42)).astype(float)
-    noise = rng.normal(0.0, 0.08, size=x_grid.shape)
-    return np.clip(0.35 * radial + 0.30 * waves + 0.27 * square + noise, 0.0, 1.0)
+def load_svd_source_image() -> np.ndarray:
+    """Load the submitted SVD source image as a normalized grayscale array."""
+    image = np.asarray(plt.imread(SVD_SOURCE_IMAGE), dtype=float)
+    if image.ndim == 2:
+        grayscale = image
+    elif image.ndim == 3 and image.shape[2] >= 3:
+        grayscale = image[..., :3] @ np.array([0.2126, 0.7152, 0.0722])
+    else:
+        raise ValueError("SVD source image must be grayscale or RGB")
+    if grayscale.max() > 1.0:
+        grayscale /= 255.0
+    return np.clip(grayscale, 0.0, 1.0)
 
 
 def generate_all_outputs(output_directory: Path) -> List[Path]:
@@ -85,7 +88,7 @@ def generate_all_outputs(output_directory: Path) -> List[Path]:
         figure, _ = plot_matrix_transform(matrix, full_title, points=circle)
         generated.append(_save_figure(figure, destination / filename))
 
-    svd_figure, _ = plot_svd_reconstructions(_sample_grayscale_image())
+    svd_figure, _ = plot_svd_reconstructions(load_svd_source_image())
     generated.append(_save_figure(svd_figure, destination / "svd_compression.png"))
 
     gradient_figure, _ = plot_gradient_field()

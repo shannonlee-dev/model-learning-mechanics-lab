@@ -125,7 +125,7 @@ eigenvector L2 error  = 5.590e-10
 iterations            = 30
 ```
 
-SVD 압축은 $A\approx U_k\Sigma_kV_k^T$로 복원합니다. 명시된 `k=100`을 실험하려면 최소 한 변의 길이가 100 이상이어야 하므로, 참고 가이드의 64×64 대신 결정론적으로 생성한 128×128 grayscale 이미지를 사용합니다.
+SVD 압축은 $A\approx U_k\Sigma_kV_k^T$로 복원합니다. 명시된 `k=100`을 실험하려면 최소 한 변의 길이가 100 이상이어야 하므로, 제출한 입력 이미지는 `assets/images/svd_source.png`에 두고 grayscale로 변환해 사용합니다.
 
 ### 미적분과 역전파
 
