@@ -1,5 +1,9 @@
 """재현 가능한 결과 산출물에 대한 엔드투엔드 테스트입니다."""
 
+import subprocess
+import sys
+from pathlib import Path
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -18,6 +22,28 @@ EXPECTED_OUTPUTS = {
     "normal_distributions.png",
     "bernoulli_distributions.png",
 }
+
+REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_linear_algebra_verification_script_reports_passing_error_thresholds():
+    """검증 스크립트가 면적비·고유값의 상대오차와 통과 기준을 숨기면 실패해야 합니다."""
+    result = subprocess.run(
+        [sys.executable, "scripts/verify_linear_algebra.py"],
+        cwd=REPOSITORY_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "[1] Area ratio vs |det(A)| (relative error <= 1.00%)" in result.stdout
+    assert "matrix               = [[3.0, 0.0], [0.0, 0.5]]" in result.stdout
+    assert "|det(A)|             = 1.500000000000" in result.stdout
+    assert "measured area ratio  = 1.500000000000" in result.stdout
+    assert "relative error       = 0.000000%" in result.stdout
+    assert "[2] Power Iteration vs np.linalg.eig (relative error <= 5.00%)" in result.stdout
+    assert "\nstatus               =" not in result.stdout
 
 
 def test_generate_all_outputs_creates_nonempty_pngs(tmp_path):

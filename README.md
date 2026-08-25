@@ -69,6 +69,7 @@ notebooks/
   probability_loss.ipynb
 scripts/
   generate_outputs.py
+  verify_linear_algebra.py  # 면적비·고유값 오차 기준 콘솔 검증
 tests/
 outputs/
 ```
@@ -95,6 +96,12 @@ MPLBACKEND=Agg python3 -m pytest -v
 MPLBACKEND=Agg python3 scripts/generate_outputs.py
 ```
 
+면적비와 Power Iteration 고유값의 제출 기준을 콘솔에서 확인합니다.
+
+```bash
+python3 scripts/verify_linear_algebra.py
+```
+
 노트북의 계산과 출력도 처음부터 재실행할 수 있습니다.
 
 ```bash
@@ -108,20 +115,25 @@ jupyter nbconvert --to notebook --execute --inplace notebooks/probability_loss.i
 
 점 집합은 `(2, n)` 열벡터로 표현합니다. 회전, 스케일, 전단 행렬을 단위 원에 적용하고 변환 전후를 겹쳐 그립니다. 신발끈 공식으로 구한 면적비와 $|\det(A)|$를 비교합니다.
 
-Power Iteration은 매 반복마다 $Av$를 정규화하고 Rayleigh quotient $v^TAv$로 최대 고유값을 추정합니다. 아래 재현 스크립트는 `np.linalg.eig`로 기준 고유쌍을 별도로 계산하고, 고유값 절대오차와 부호 불변 고유벡터 정렬도/L2 오차를 출력합니다.
+Power Iteration은 매 반복마다 $Av$를 정규화하고 Rayleigh quotient $v^TAv$로 최대 고유값을 추정합니다. 아래 전용 검증 스크립트는 면적비와 $|\det(A)|$의 상대오차가 1% 이내인지, Power Iteration 고유값과 `np.linalg.eig` 기준값의 상대오차가 5% 이내인지를 각 섹션의 기준과 수치로 출력합니다.
 
 ```text
-$ MPLBACKEND=Agg python3 scripts/generate_outputs.py
-...
-Power Iteration vs np.linalg.eig
+$ python3 scripts/verify_linear_algebra.py
+Linear algebra verification
+
+[1] Area ratio vs |det(A)| (relative error <= 1.00%)
+matrix               = [[3.0, 0.0], [0.0, 0.5]]
+det(A)               = 1.500000000000
+|det(A)|             = 1.500000000000
+measured area ratio  = 1.500000000000
+relative error       = 0.000000%
+
+[2] Power Iteration vs np.linalg.eig (relative error <= 5.00%)
 matrix = [[4.0, 1.0], [1.0, 3.0]]
 power eigenvalue     = 4.618033988750
-numpy eig eigenvalue = 4.618033988750
+np.linalg.eig value  = 4.618033988750
 eigenvalue abs error = 8.882e-16
-power eigenvector     = [0.85065081 0.52573111]
-numpy eig eigenvector = [0.85065081 0.52573111]
-eigenvector alignment = 1.000000000000
-eigenvector L2 error  = 5.590e-10
+relative error       = 0.000000%
 iterations            = 30
 ```
 

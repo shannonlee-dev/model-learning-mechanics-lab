@@ -23,7 +23,6 @@ from src.linear_algebra import (  # noqa: E402
     area_scale_error,
     plot_matrix_transform,
     plot_svd_reconstructions,
-    power_iteration_comparison,
     rotation_matrix,
     scaling_matrix,
     shear_matrix,
@@ -313,31 +312,7 @@ def generate_all_outputs(output_directory: Path) -> List[Path]:
     return generated
 
 
-def print_power_iteration_comparison() -> None:
-    """재현 가능한 Power Iteration과 NumPy eig 비교 결과를 출력합니다."""
-    matrix = np.array([[4.0, 1.0], [1.0, 3.0]])
-    comparison = power_iteration_comparison(
-        matrix,
-        initial_vector=np.array([1.0, 1.0]),
-    )
-    print(f"{'='*40}\n\n\n")
-    print("Power Iteration vs np.linalg.eig\n")
-    print(f"matrix = {matrix.tolist()}")
-    print(f"power eigenvalue     = {comparison['power_eigenvalue']:.12f}")
-    print(f"numpy eig eigenvalue = {comparison['reference_eigenvalue']:.12f}")
-    print(
-        "eigenvalue abs error = "
-        f"{comparison['eigenvalue_absolute_error']:.3e}"
-    )
-    print(f"power eigenvector     = {comparison['power_eigenvector']}")
-    print(f"numpy eig eigenvector = {comparison['reference_eigenvector']}")
-    print(f"eigenvector alignment = {comparison['eigenvector_alignment']:.12f}")
-    print(f"eigenvector L2 error  = {comparison['eigenvector_l2_error']:.3e}")
-    print(f"iterations            = {comparison['iterations']}")
-
-
 if __name__ == "__main__":
     result_paths = generate_all_outputs(REPOSITORY_ROOT / "outputs")
     for result_path in result_paths:
         print(result_path.relative_to(REPOSITORY_ROOT))
-    print_power_iteration_comparison()
