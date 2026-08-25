@@ -172,6 +172,30 @@ Vanilla GD와 Momentum 모두 초기점을 포함한 전체 parameter path를 �
 - 일정한 분산의 정규 오차 가정: MSE 최소화 = Gaussian MLE
 - 베르누이/카테고리 가정: Cross-Entropy 최소화 = Bernoulli/Categorical MLE
 
+#### 왜 MSE와 Cross-Entropy의 모양이 다른가?
+
+손실 함수의 모양은 임의로 정하는 것이 아니라, **관측값을 어떤 확률분포로 가정하는지**에서 나옵니다. 학습은 likelihood를 최대화하는 대신 negative log-likelihood를 최소화하므로, 분포마다 서로 다른 손실이 만들어집니다.
+
+**회귀**에서는 연속형 타깃의 오차를 일정한 분산의 Gaussian으로 가정합니다.
+
+$$p(y\mid x;\theta)=\frac{1}{\sqrt{2\pi\sigma^2}}\exp\left(-\frac{(y-f_\theta(x))^2}{2\sigma^2}\right)$$
+
+여기에 negative log를 취하면 상수항을 제외하고 제곱오차의 합이 남습니다. 따라서 MLE는 MSE 최소화와 같습니다.
+
+**이진 분류**에서는 $y\in\{0,1\}$을 Bernoulli 확률변수로 보고, 모델이 $p=P(y=1\mid x)$를 예측한다고 가정합니다.
+
+$$p(y\mid x;\theta)=p^y(1-p)^{1-y}$$
+
+negative log-likelihood는 다음의 binary cross-entropy(BCE)가 됩니다.
+
+$$-\left[y\log p+(1-y)\log(1-p)\right]$$
+
+**다중 분류**에서는 class probability $p_k=P(y=k\mid x)$를 예측하는 Categorical 분포를 가정합니다. one-hot 타깃 $y_k$에 대해 negative log-likelihood는 cross-entropy(CE)입니다.
+
+$$-\sum_k y_k\log p_k$$
+
+정답 클래스만 $1$인 경우 이는 $-\log p_{\text{true}}$가 됩니다. 즉 MSE와 CE의 차이는 “연속값의 Gaussian 오차”와 “클래스 확률의 Bernoulli/Categorical 관측”이라는 서로 다른 가정의 결과입니다.
+
 Softmax는 exponentiation 전에 최대 logit을 빼서 큰 입력에서도 overflow를 방지합니다.
 
 ## 결과 갤러리
