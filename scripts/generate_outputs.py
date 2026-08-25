@@ -320,7 +320,8 @@ def print_power_iteration_comparison() -> None:
         matrix,
         initial_vector=np.array([1.0, 1.0]),
     )
-    print("Power Iteration vs np.linalg.eig")
+    print(f"{'='*40}\n\n\n")
+    print("Power Iteration vs np.linalg.eig\n")
     print(f"matrix = {matrix.tolist()}")
     print(f"power eigenvalue     = {comparison['power_eigenvalue']:.12f}")
     print(f"numpy eig eigenvalue = {comparison['reference_eigenvalue']:.12f}")
