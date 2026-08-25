@@ -26,10 +26,10 @@ EXPECTED_OUTPUTS = {
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_linear_algebra_verification_script_reports_passing_error_thresholds():
-    """검증 스크립트가 면적비·고유값의 상대오차와 통과 기준을 숨기면 실패해야 합니다."""
+def test_submission_criteria_script_reports_all_numeric_error_thresholds():
+    """제출 기준별 수치·오차·임계값을 누락하면 평가용 콘솔 기록이 깨져야 합니다."""
     result = subprocess.run(
-        [sys.executable, "scripts/verify_linear_algebra.py"],
+        [sys.executable, "scripts/verify_submission_criteria.py"],
         cwd=REPOSITORY_ROOT,
         capture_output=True,
         text=True,
@@ -43,6 +43,12 @@ def test_linear_algebra_verification_script_reports_passing_error_thresholds():
     assert "measured area ratio  = 1.500000000000" in result.stdout
     assert "relative error       = 0.000000%" in result.stdout
     assert "[2] Power Iteration vs np.linalg.eig (relative error <= 5.00%)" in result.stdout
+    assert "[3] Numerical differentiation vs analytical derivative (absolute error <= 1.0e-04)" in result.stdout
+    assert "analytical derivative = 6.000000000000" in result.stdout
+    assert "absolute error         =" in result.stdout
+    assert "[4] Softmax output sum (difference from 1 <= 1.0e-06)" in result.stdout
+    assert "probability sum        = 1.000000000000000" in result.stdout
+    assert "difference from 1      =" in result.stdout
     assert "\nstatus               =" not in result.stdout
 
 

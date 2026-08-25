@@ -69,7 +69,7 @@ notebooks/
   probability_loss.ipynb
 scripts/
   generate_outputs.py
-  verify_linear_algebra.py  # 면적비·고유값 오차 기준 콘솔 검증
+  verify_submission_criteria.py  # 제출 수치 기준 콘솔 검증
 tests/
 outputs/
 ```
@@ -96,10 +96,10 @@ MPLBACKEND=Agg python3 -m pytest -v
 MPLBACKEND=Agg python3 scripts/generate_outputs.py
 ```
 
-면적비와 Power Iteration 고유값의 제출 기준을 콘솔에서 확인합니다.
+면적비, Power Iteration, 수치미분, Softmax의 제출 기준을 콘솔에서 확인합니다.
 
 ```bash
-python3 scripts/verify_linear_algebra.py
+python3 scripts/verify_submission_criteria.py
 ```
 
 노트북의 계산과 출력도 처음부터 재실행할 수 있습니다.
@@ -115,11 +115,11 @@ jupyter nbconvert --to notebook --execute --inplace notebooks/probability_loss.i
 
 점 집합은 `(2, n)` 열벡터로 표현합니다. 회전, 스케일, 전단 행렬을 단위 원에 적용하고 변환 전후를 겹쳐 그립니다. 신발끈 공식으로 구한 면적비와 $|\det(A)|$를 비교합니다.
 
-Power Iteration은 매 반복마다 $Av$를 정규화하고 Rayleigh quotient $v^TAv$로 최대 고유값을 추정합니다. 아래 전용 검증 스크립트는 면적비와 $|\det(A)|$의 상대오차가 1% 이내인지, Power Iteration 고유값과 `np.linalg.eig` 기준값의 상대오차가 5% 이내인지를 각 섹션의 기준과 수치로 출력합니다.
+Power Iteration은 매 반복마다 $Av$를 정규화하고 Rayleigh quotient $v^TAv$로 최대 고유값을 추정합니다. 아래 전용 검증 스크립트는 면적비와 $|\det(A)|$의 상대오차(1% 이내), Power Iteration 고유값과 `np.linalg.eig` 기준값의 상대오차(5% 이내), 수치미분과 해석해의 절대오차($10^{-4}$ 이내), Softmax 출력 합의 1과의 차이($10^{-6}$ 이내)를 각 섹션의 기준과 수치로 출력합니다.
 
 ```text
-$ python3 scripts/verify_linear_algebra.py
-Linear algebra verification
+$ python3 scripts/verify_submission_criteria.py
+Submission criteria verification
 
 [1] Area ratio vs |det(A)| (relative error <= 1.00%)
 matrix               = [[3.0, 0.0], [0.0, 0.5]]
@@ -135,6 +135,18 @@ np.linalg.eig value  = 4.618033988750
 eigenvalue abs error = 8.882e-16
 relative error       = 0.000000%
 iterations            = 30
+
+[3] Numerical differentiation vs analytical derivative (absolute error <= 1.0e-04)
+function              = f(x) = x^2, x = 3
+numerical derivative  = 6.000000000039
+analytical derivative = 6.000000000000
+absolute error         = 3.931e-11
+
+[4] Softmax output sum (difference from 1 <= 1.0e-06)
+logits                 = [1000.0, 1001.0, 1002.0]
+probabilities          = [0.09003057 0.24472847 0.66524096]
+probability sum        = 1.000000000000000
+difference from 1      = 1.110e-16
 ```
 
 SVD 압축은 $A\approx U_k\Sigma_kV_k^T$로 복원합니다. 명시된 `k=100`을 실험하려면 최소 한 변의 길이가 100 이상이어야 하므로, 제출한 입력 이미지는 `assets/images/svd_source.png`에 두고 grayscale로 변환해 사용합니다.
