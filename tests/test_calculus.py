@@ -3,6 +3,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
+from matplotlib.quiver import Quiver
 
 from src.calculus import (
     central_difference,
@@ -57,6 +58,25 @@ def test_gradient_plot_contains_contours_and_vector_field():
     assert axes.collections
     assert axes.get_aspect() in (1.0, "equal")
     assert axes.get_title() == "Gradient of f(x, y) = x² + y²"
+    plt.close(figure)
+
+
+def test_gradient_plot_marks_tangents_perpendicular_to_every_gradient():
+    """어느 점의 접선이나 직각 마커가 빠지면 수직 관계를 읽을 수 없어야 합니다."""
+    figure, axes = plot_gradient_field()
+    arrows = {
+        arrow.get_label(): arrow
+        for arrow in axes.collections
+        if isinstance(arrow, Quiver)
+    }
+
+    gradient_arrow = arrows["Gradient direction"]
+    tangent_arrow = arrows["Tangent direction"]
+    np.testing.assert_allclose(tangent_arrow.X, gradient_arrow.X)
+    np.testing.assert_allclose(tangent_arrow.Y, gradient_arrow.Y)
+    dot_products = gradient_arrow.U * tangent_arrow.U + gradient_arrow.V * tangent_arrow.V
+    np.testing.assert_allclose(dot_products, 0.0, atol=1e-12)
+    assert len(axes.lines) == len(gradient_arrow.X)
     plt.close(figure)
 
 

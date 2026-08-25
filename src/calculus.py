@@ -133,6 +133,43 @@ def plot_gradient_field(
         width=0.008,
         label="Gradient direction",
     )
+    # 모든 그래디언트에 수직인 등고선 접선 방향 (-g_y, g_x)을 함께 표시합니다.
+    tangent_directions = np.column_stack((-directions[:, 1], directions[:, 0]))
+    axes.quiver(
+        samples[:, 0],
+        samples[:, 1],
+        tangent_directions[:, 0],
+        tangent_directions[:, 1],
+        color="tab:blue",
+        angles="xy",
+        scale_units="xy",
+        scale=0.45,
+        width=0.008,
+        label="Tangent direction",
+        zorder=4,
+    )
+    # 각 점에서 두 방향에 평행한 선분을 이어 수직 관계를 보여 주는 작은 ㄱ자 마커입니다.
+    marker_size = 0.24
+    for index, (point, direction, tangent) in enumerate(
+        zip(samples, directions, tangent_directions)
+    ):
+        marker_corner = point + 0.34 * (direction + tangent)
+        axes.plot(
+            [
+                marker_corner[0] - marker_size * direction[0],
+                marker_corner[0],
+                marker_corner[0] - marker_size * tangent[0],
+            ],
+            [
+                marker_corner[1] - marker_size * direction[1],
+                marker_corner[1],
+                marker_corner[1] - marker_size * tangent[1],
+            ],
+            color="black",
+            linewidth=1.8,
+            label="Right angle" if index == 0 else "_nolegend_",
+            zorder=5,
+        )
     # 화살표가 시작하는 좌표를 검은 점으로 함께 표시합니다.
     axes.scatter(samples[:, 0], samples[:, 1], color="black", s=22, zorder=3)
     # x축과 y축의 실제 길이 비율을 같게 유지합니다.
@@ -141,5 +178,6 @@ def plot_gradient_field(
     axes.set_ylabel("y")
     axes.set_title("Gradient of f(x, y) = x² + y²")
     axes.grid(alpha=0.2)
+    axes.legend(loc="upper left")
     figure.tight_layout()
     return figure, axes
