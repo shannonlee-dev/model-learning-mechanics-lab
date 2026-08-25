@@ -63,6 +63,20 @@ def test_matrix_transform_plot_overlays_original_and_transformed_curves():
     plt.close(figure)
 
 
+def test_rotation_plot_marks_basis_vectors_and_rotation_angle():
+    """회전 대칭인 원에서도 기준 벡터의 이동과 회전각은 보여야 합니다."""
+    figure, axes = plot_matrix_transform(
+        rotation_matrix(np.pi / 4),
+        "Rotation",
+    )
+    labels = {artist.get_label() for artist in axes.collections}
+
+    assert {"Original basis", "Transformed basis"}.issubset(labels)
+    assert any(text.get_text() == "45°" for text in axes.texts)
+    assert len(axes.patches) == 1
+    plt.close(figure)
+
+
 def test_power_iteration_matches_dominant_numpy_eigenpair():
     """정규화나 몫이 틀리면 기준 고유쌍과 일치하지 않아야 합니다."""
     matrix = np.array([[4.0, 1.0], [1.0, 3.0]])

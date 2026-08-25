@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
+from matplotlib.patches import Arc
 
 
 def unit_circle(num_points: int = 361) -> np.ndarray:
@@ -88,20 +89,87 @@ def plot_matrix_transform(
     ax: Optional[Axes] = None,
 ) -> Tuple[Figure, Axes]:
     """하나의 Figure에 원본과 변환한 단위 원 점을 겹쳐 그립니다."""
+    matrix_array = np.asarray(matrix, dtype=float)
     point_array = unit_circle() if points is None else np.asarray(points, dtype=float)
-    transformed = transform_points(matrix, point_array)
+    transformed = transform_points(matrix_array, point_array)
     if ax is None:
         figure, axes = plt.subplots(figsize=(6, 6))
     else:
         axes = ax
         figure = axes.figure
-    axes.plot(point_array[0], point_array[1], label="Original", color="tab:blue")
+    axes.plot(
+        point_array[0],
+        point_array[1],
+        label="Original",
+        color="tab:blue",
+        linestyle="--",
+        linewidth=2.0,
+        zorder=3,
+    )
     axes.plot(
         transformed[0],
         transformed[1],
         label="Transformed",
         color="tab:red",
+        linewidth=2.0,
+        alpha=0.85,
+        zorder=2,
     )
+    original_basis = np.eye(2)
+    transformed_basis = transform_points(matrix_array, original_basis)
+    quiver_options = {
+        "angles": "xy",
+        "scale_units": "xy",
+        "scale": 1.0,
+        "width": 0.006,
+    }
+    axes.quiver(
+        [0.0, 0.0],
+        [0.0, 0.0],
+        original_basis[0],
+        original_basis[1],
+        color="tab:blue",
+        label="Original basis",
+        **quiver_options,
+    )
+    axes.quiver(
+        [0.0, 0.0],
+        [0.0, 0.0],
+        transformed_basis[0],
+        transformed_basis[1],
+        color="tab:red",
+        label="Transformed basis",
+        **quiver_options,
+    )
+    is_rotation = np.allclose(matrix_array.T @ matrix_array, np.eye(2)) and np.isclose(
+        np.linalg.det(matrix_array),
+        1.0,
+    )
+    if is_rotation:
+        angle_degrees = float(
+            np.degrees(np.arctan2(matrix_array[1, 0], matrix_array[0, 0]))
+        )
+        if not np.isclose(angle_degrees, 0.0):
+            axes.add_patch(
+                Arc(
+                    (0.0, 0.0),
+                    0.72,
+                    0.72,
+                    theta1=min(0.0, angle_degrees),
+                    theta2=max(0.0, angle_degrees),
+                    color="tab:red",
+                    linewidth=1.5,
+                )
+            )
+            half_angle = np.radians(angle_degrees / 2.0)
+            axes.text(
+                0.46 * np.cos(half_angle),
+                0.46 * np.sin(half_angle),
+                f"{angle_degrees:.0f}°",
+                color="tab:red",
+                ha="center",
+                va="center",
+            )
     axes.axhline(0.0, color="black", linewidth=0.5)
     axes.axvline(0.0, color="black", linewidth=0.5)
     axes.set_aspect("equal", adjustable="box")
@@ -109,7 +177,7 @@ def plot_matrix_transform(
     axes.set_xlabel("x")
     axes.set_ylabel("y")
     axes.grid(alpha=0.25)
-    axes.legend()
+    axes.legend(loc="lower left")
     figure.tight_layout()
     return figure, axes
 
