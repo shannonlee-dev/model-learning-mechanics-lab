@@ -36,6 +36,7 @@ from src.optimizer import (  # noqa: E402
     elliptical_gradient,
     optimize,
     plot_optimization_paths,
+    plot_path_metric,
     sphere,
     sphere_gradient,
 )
@@ -64,6 +65,149 @@ def load_svd_source_image() -> np.ndarray:
     if grayscale.max() > 1.0:
         grayscale /= 255.0
     return np.clip(grayscale, 0.0, 1.0)
+
+
+def _metric_summary(paths, metric, unit: str) -> str:
+    """각 경로의 초기·중간·최종 지표를 compact한 표 형태로 반환합니다."""
+    rows = [f"{'Path':<18} {'start':>10} {'middle':>10} {'final':>10}"]
+    for label, path in paths.items():
+        values = np.asarray(metric(path), dtype=float)
+        middle = values[len(values) // 2]
+        rows.append(
+            f"{label:<18} {values[0]:>10.2e} {middle:>10.2e} {values[-1]:>10.2e}"
+        )
+    return f"{unit}\n" + "\n".join(rows)
+
+
+def _optimizer_comparison_figure(
+    objective,
+    paths,
+    x_limits,
+    y_limits,
+    title: str,
+    subtitle: str,
+    caption: str,
+):
+    """경로 등고선과 iteration별 목적 함수 값을 나란히 구성합니다."""
+    figure, (path_axes, loss_axes) = plt.subplots(
+        1,
+        2,
+        figsize=(13.5, 5.8),
+        gridspec_kw={"width_ratios": (1.05, 1.0)},
+    )
+    plot_optimization_paths(
+        objective,
+        paths,
+        x_limits=x_limits,
+        y_limits=y_limits,
+        title="Parameter-space path",
+        ax=path_axes,
+    )
+    plot_path_metric(
+        paths,
+        metric=objective,
+        title="Objective value by iteration",
+        ylabel="Objective  f(xₖ)",
+        ax=loss_axes,
+    )
+    loss_axes.text(
+        0.03,
+        0.04,
+        _metric_summary(paths, objective, "Objective values"),
+        transform=loss_axes.transAxes,
+        va="bottom",
+        family="monospace",
+        fontsize=8.5,
+        bbox={"boxstyle": "round,pad=0.5", "facecolor": "white", "alpha": 0.9},
+    )
+    figure.suptitle(title, fontsize=16, fontweight="semibold", y=0.985)
+    figure.text(0.5, 0.93, subtitle, ha="center", color="#475569", fontsize=10.5)
+    figure.text(0.5, 0.018, caption, ha="center", color="#334155", fontsize=9.5)
+    figure.tight_layout(rect=(0.02, 0.07, 0.98, 0.91), w_pad=2.4)
+    return figure
+
+
+def _learning_rate_stability_figure(convergent, divergent):
+    """수렴·발산 경로를 독립 축과 거리 진단 패널로 비교합니다."""
+    paths = {
+        "lr=0.1 (convergent)": convergent,
+        "lr=1.1 (divergent)": divergent,
+    }
+    figure, axes = plt.subplots(
+        1,
+        3,
+        figsize=(17.0, 5.6),
+        gridspec_kw={"width_ratios": (1.0, 1.0, 1.1)},
+    )
+    plot_optimization_paths(
+        sphere,
+        {"lr=0.1 (convergent)": convergent},
+        x_limits=(-6.0, 6.0),
+        y_limits=(-6.0, 6.0),
+        title="Stable steps: zoomed view",
+        ax=axes[0],
+    )
+    plot_optimization_paths(
+        sphere,
+        {"lr=1.1 (divergent)": divergent},
+        x_limits=(-50.0, 50.0),
+        y_limits=(-50.0, 50.0),
+        title="Overshoot grows every step",
+        ax=axes[1],
+    )
+    distance = lambda points: np.linalg.norm(points, axis=1)
+    plot_path_metric(
+        paths,
+        metric=distance,
+        title="Distance to optimum",
+        ylabel="Radius  ‖xₖ‖₂",
+        ax=axes[2],
+    )
+    axes[2].text(
+        0.04,
+        0.05,
+        _metric_summary(paths, distance, "Radius from (0, 0)"),
+        transform=axes[2].transAxes,
+        va="bottom",
+        family="monospace",
+        fontsize=8.2,
+        bbox={"boxstyle": "round,pad=0.5", "facecolor": "white", "alpha": 0.9},
+    )
+    axes[2].text(
+        0.97,
+        0.73,
+        "Stable: 0 < lr < 1\nBoundary: lr = 1\nDivergent: lr > 1",
+        transform=axes[2].transAxes,
+        ha="right",
+        va="top",
+        fontsize=9.3,
+        color="#334155",
+        bbox={"boxstyle": "round,pad=0.45", "facecolor": "#F8FAFC", "alpha": 0.95},
+    )
+    figure.suptitle(
+        "Vanilla GD learning-rate stability",
+        fontsize=16,
+        fontweight="semibold",
+        y=0.985,
+    )
+    figure.text(
+        0.5,
+        0.93,
+        "f(x, y) = x² + y²  ·  start=(5, 5)  ·  update multiplier=(1−2lr)",
+        ha="center",
+        color="#475569",
+        fontsize=10.5,
+    )
+    figure.text(
+        0.5,
+        0.018,
+        "A small learning rate contracts toward the optimum; lr=1.1 flips direction and expands by 20% per step.",
+        ha="center",
+        color="#334155",
+        fontsize=9.5,
+    )
+    figure.tight_layout(rect=(0.01, 0.07, 0.99, 0.91), w_pad=2.0)
+    return figure
 
 
 def generate_all_outputs(output_directory: Path) -> List[Path]:
@@ -96,13 +240,7 @@ def generate_all_outputs(output_directory: Path) -> List[Path]:
 
     convergent = optimize(sphere_gradient, [5.0, 5.0], VanillaGD(0.1), steps=100)
     divergent = optimize(sphere_gradient, [5.0, 5.0], VanillaGD(1.1), steps=12)
-    convergence_figure, _ = plot_optimization_paths(
-        sphere,
-        {"lr=0.1 (convergent)": convergent, "lr=1.1 (divergent)": divergent},
-        x_limits=(-50.0, 50.0),
-        y_limits=(-50.0, 50.0),
-        title="Vanilla GD: learning-rate stability",
-    )
+    convergence_figure = _learning_rate_stability_figure(convergent, divergent)
     generated.append(
         _save_figure(convergence_figure, destination / "gd_convergence_divergence.png")
     )
@@ -119,12 +257,17 @@ def generate_all_outputs(output_directory: Path) -> List[Path]:
         Momentum(0.1, beta=0.9),
         steps=100,
     )
-    optimizer_figure, _ = plot_optimization_paths(
+    optimizer_figure = _optimizer_comparison_figure(
         sphere,
         {"Vanilla GD": vanilla_sphere, "Momentum β=0.9": momentum_sphere},
         x_limits=(-6.0, 6.0),
         y_limits=(-6.0, 6.0),
-        title="Optimizer paths on f(x, y) = x² + y²",
+        title="Vanilla GD vs. Momentum on an isotropic bowl",
+        subtitle="f(x, y) = x² + y²  ·  start=(5, 5)  ·  lr=0.1  ·  β=0.9  ·  100 steps",
+        caption=(
+            "Both methods stay on the same radial line; Momentum overshoots the optimum, "
+            "while Vanilla GD contracts directly."
+        ),
     )
     generated.append(
         _save_figure(optimizer_figure, destination / "optimizer_comparison.png")
@@ -142,12 +285,17 @@ def generate_all_outputs(output_directory: Path) -> List[Path]:
         Momentum(0.01, beta=0.9),
         steps=60,
     )
-    elliptical_figure, _ = plot_optimization_paths(
+    elliptical_figure = _optimizer_comparison_figure(
         elliptical,
         {"Vanilla GD": vanilla_elliptical, "Momentum β=0.9": momentum_elliptical},
         x_limits=(-6.0, 6.0),
         y_limits=(-6.0, 6.0),
-        title="Optimizer paths on f(x, y) = x² + 10y²",
+        title="Vanilla GD vs. Momentum on an ill-conditioned bowl",
+        subtitle="f(x, y) = x² + 10y²  ·  start=(5, 5)  ·  lr=0.01  ·  β=0.9  ·  60 steps",
+        caption=(
+            "Momentum trades transient cross-valley oscillation for faster progress "
+            "along the shallow x direction."
+        ),
     )
     generated.append(
         _save_figure(
