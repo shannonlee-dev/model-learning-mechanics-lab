@@ -146,9 +146,7 @@ def plot_matrix_transform(
         1.0,
     )
     if is_rotation:
-        angle_degrees = float(
-            np.degrees(np.arctan2(matrix_array[1, 0], matrix_array[0, 0]))
-        )
+        angle_degrees = float(np.degrees(np.arctan2(matrix_array[1, 0], matrix_array[0, 0])))
         if not np.isclose(angle_degrees, 0.0):
             axes.add_patch(
                 Arc(

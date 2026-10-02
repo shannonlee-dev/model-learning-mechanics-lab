@@ -7,7 +7,6 @@ import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
-
 PATH_COLORS = ("#2563EB", "#E4572E", "#7C3AED", "#0891B2")
 
 

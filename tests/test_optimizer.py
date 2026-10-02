@@ -4,14 +4,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 
-from src.optimizer import (
+from model_learning_mechanics.optimizer import (
     Momentum,
     VanillaGD,
     elliptical,
     elliptical_gradient,
     optimize,
-    plot_path_metric,
     plot_optimization_paths,
+    plot_path_metric,
     sphere,
     sphere_gradient,
 )
@@ -45,6 +45,7 @@ def test_optimizers_reject_invalid_hyperparameters(factory):
         factory()
 
 
+@pytest.mark.smoke
 def test_vanilla_gd_reaches_radius_point_one_after_100_steps():
     """경로 반복문이 깨지면 미션의 수렴 임계값을 만족하지 못해야 합니다."""
     path = optimize(sphere_gradient, [5.0, 5.0], VanillaGD(0.1), steps=100)
@@ -144,9 +145,7 @@ def test_path_color_stays_consistent_when_a_series_moves_to_its_own_panel():
     )
 
     combined_color = next(
-        line.get_color()
-        for line in combined_axes.lines
-        if line.get_label() == "lr=1.1 (divergent)"
+        line.get_color() for line in combined_axes.lines if line.get_label() == "lr=1.1 (divergent)"
     )
     separate_color = separate_axes.lines[0].get_color()
     assert separate_color == combined_color

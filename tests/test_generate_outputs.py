@@ -4,11 +4,15 @@ import subprocess
 import sys
 from pathlib import Path
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+import pytest
 
-from scripts.generate_outputs import SVD_SOURCE_IMAGE, generate_all_outputs, load_svd_source_image
-
+from model_learning_mechanics.outputs import (
+    SVD_SOURCE_IMAGE,
+    generate_all_outputs,
+    load_svd_source_image,
+)
 
 EXPECTED_OUTPUTS = {
     "rotation_transform.png",
@@ -26,10 +30,11 @@ EXPECTED_OUTPUTS = {
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 
 
+@pytest.mark.smoke
 def test_submission_criteria_script_reports_all_numeric_error_thresholds():
     """제출 기준별 수치·오차·임계값을 누락하면 평가용 콘솔 기록이 깨져야 합니다."""
     result = subprocess.run(
-        [sys.executable, "scripts/verify_submission_criteria.py"],
+        [sys.executable, "-m", "model_learning_mechanics.verification"],
         cwd=REPOSITORY_ROOT,
         capture_output=True,
         text=True,
@@ -43,7 +48,10 @@ def test_submission_criteria_script_reports_all_numeric_error_thresholds():
     assert "measured area ratio  = 1.500000000000" in result.stdout
     assert "relative error       = 0.000000%" in result.stdout
     assert "[2] Power Iteration vs np.linalg.eig (relative error <= 5.00%)" in result.stdout
-    assert "[3] Numerical differentiation vs analytical derivative (absolute error <= 1.0e-04)" in result.stdout
+    assert (
+        "[3] Numerical differentiation vs analytical derivative (absolute error <= 1.0e-04)"
+        in result.stdout
+    )
     assert "analytical derivative = 6.000000000000" in result.stdout
     assert "absolute error         =" in result.stdout
     assert "[4] Softmax output sum (difference from 1 <= 1.0e-06)" in result.stdout

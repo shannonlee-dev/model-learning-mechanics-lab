@@ -1,23 +1,24 @@
 """제출 기준의 수치 검증 결과를 콘솔에 출력합니다."""
 
 import os
-import sys
 import tempfile
 from pathlib import Path
 
 import numpy as np
 
-REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+from model_learning_mechanics.calculus import central_difference
+from model_learning_mechanics.linear_algebra import (
+    area_scale_error,
+    power_iteration_comparison,
+    unit_circle,
+)
+from model_learning_mechanics.probability import softmax
+
+REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 os.environ.setdefault(
     "MPLCONFIGDIR",
     str(Path(tempfile.gettempdir()) / "model-learning-mechanics-matplotlib"),
 )
-if str(REPOSITORY_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPOSITORY_ROOT))
-
-from src.calculus import central_difference
-from src.linear_algebra import area_scale_error, power_iteration_comparison, unit_circle
-from src.probability import softmax
 
 
 AREA_ERROR_THRESHOLD = 0.01
@@ -59,9 +60,7 @@ def print_submission_criteria() -> None:
         differentiation_x,
     )
     analytical_derivative = 2.0 * differentiation_x
-    differentiation_absolute_error = abs(
-        numerical_derivative - analytical_derivative
-    )
+    differentiation_absolute_error = abs(numerical_derivative - analytical_derivative)
 
     logits = np.array([1000.0, 1001.0, 1002.0])
     probabilities = softmax(logits)
@@ -78,16 +77,12 @@ def print_submission_criteria() -> None:
     print(f"relative error       = {area_relative_error:.6%}")
     print()
     print(
-        "[2] Power Iteration vs np.linalg.eig "
-        f"(relative error <= {EIGENVALUE_ERROR_THRESHOLD:.2%})"
+        f"[2] Power Iteration vs np.linalg.eig (relative error <= {EIGENVALUE_ERROR_THRESHOLD:.2%})"
     )
     print(f"matrix               = {eigen_matrix.tolist()}")
     print(f"power eigenvalue     = {power_eigenvalue:.12f}")
     print(f"np.linalg.eig value  = {reference_eigenvalue:.12f}")
-    print(
-        "eigenvalue abs error = "
-        f"{float(eigen_comparison['eigenvalue_absolute_error']):.3e}"
-    )
+    print(f"eigenvalue abs error = {float(eigen_comparison['eigenvalue_absolute_error']):.3e}")
     print(f"relative error       = {eigenvalue_relative_error:.6%}")
     print(f"iterations           = {eigen_comparison['iterations']}")
     print()
@@ -100,10 +95,7 @@ def print_submission_criteria() -> None:
     print(f"analytical derivative = {analytical_derivative:.12f}")
     print(f"absolute error         = {differentiation_absolute_error:.3e}")
     print()
-    print(
-        "[4] Softmax output sum "
-        f"(difference from 1 <= {SOFTMAX_SUM_ERROR_THRESHOLD:.1e})"
-    )
+    print(f"[4] Softmax output sum (difference from 1 <= {SOFTMAX_SUM_ERROR_THRESHOLD:.1e})")
     print(f"logits                 = {logits.tolist()}")
     print(f"probabilities          = {probabilities}")
     print(f"probability sum        = {probability_sum:.15f}")

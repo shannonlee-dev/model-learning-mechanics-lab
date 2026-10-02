@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 from matplotlib.quiver import Quiver
 
-from src.calculus import (
+from model_learning_mechanics.calculus import (
     central_difference,
     numerical_gradient,
     plot_gradient_field,
@@ -64,11 +64,7 @@ def test_gradient_plot_contains_contours_and_vector_field():
 def test_gradient_plot_marks_tangents_perpendicular_to_every_gradient():
     """어느 점의 접선이나 직각 마커가 빠지면 수직 관계를 읽을 수 없어야 합니다."""
     figure, axes = plot_gradient_field()
-    arrows = {
-        arrow.get_label(): arrow
-        for arrow in axes.collections
-        if isinstance(arrow, Quiver)
-    }
+    arrows = {arrow.get_label(): arrow for arrow in axes.collections if isinstance(arrow, Quiver)}
 
     gradient_arrow = arrows["Gradient direction"]
     tangent_arrow = arrows["Tangent direction"]

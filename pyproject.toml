@@ -1,0 +1,37 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "model-learning-mechanics-lab"
+version = "0.1.0"
+description = "선형대수·미분·확률·최적화 계산으로 모델 학습의 원리를 검증하는 실험실"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = ["numpy>=1.21", "matplotlib>=3.4", "seaborn>=0.11", "jupyter>=1.0", "nbconvert>=6.0"]
+
+[project.scripts]
+mechanics-generate = "model_learning_mechanics.outputs:main"
+mechanics-verify = "model_learning_mechanics.verification:print_submission_criteria"
+
+[dependency-groups]
+dev = ["pytest>=7", "ruff>=0.11,<1"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/model_learning_mechanics"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"assets/images/svd_source.png" = "model_learning_mechanics/data/svd_source.png"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--import-mode=importlib --strict-markers"
+markers = ["smoke: 외부 서비스·원본 데이터 변경 없이 주요 실행 경로 검증"]
+
+[tool.ruff]
+target-version = "py38"
+line-length = 100
+extend-exclude = ["notebooks"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]

@@ -4,13 +4,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 
-from src.linear_algebra import (
+from model_learning_mechanics.linear_algebra import (
     area_scale_error,
     compress_image_svd,
     plot_matrix_transform,
-    power_iteration_comparison,
     plot_svd_reconstructions,
     power_iteration,
+    power_iteration_comparison,
     rotation_matrix,
     scaling_matrix,
     shear_matrix,

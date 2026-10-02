@@ -1,5 +1,42 @@
 # Model Learning Mechanics Lab
 
+## 프로젝트 소개
+
+선형대수, 미적분, 최적화와 확률이 모델 학습에 어떻게 연결되는지 NumPy 계산과 재현 가능한 시각화로 확인하는 실험 프로젝트다. 기존 수치 결과, 그래프, 노트북과 결정론적 입력을 함께 보존한다.
+
+## 핵심 특징
+
+- 행렬 변환, Power Iteration과 SVD 압축을 수치 기준으로 검증한다.
+- 중심차분과 역전파, VanillaGD와 Momentum의 수렴·발산을 비교한다.
+- 확률분포, 안정적인 Softmax와 손실 함수의 관계를 설명한다.
+- 설치 가능한 Python 패키지, uv 잠금 환경, pytest와 결과 생성 CLI를 제공한다.
+
+## 아키텍처
+
+| 구성 요소 | 역할 |
+| --- | --- |
+| `linear_algebra.py` | 행렬 변환·고유값·SVD |
+| `calculus.py` | 수치미분·gradient 계산과 시각화 |
+| `optimizer.py` | 경사하강법·Momentum·경로 비교 |
+| `probability.py` | 분포·Softmax·손실 |
+| `outputs.py`, `verification.py` | 결정론적 그림 생성과 수치 기준 검증 |
+| `notebooks/`, `tests/` | 수학 해설과 독립적인 검증 |
+
+```mermaid
+flowchart LR
+    Inputs[고정 입력과 원본 이미지] --> Algebra[선형대수]
+    Inputs --> Calculus[미적분]
+    Calculus --> Optimizers[GD와 Momentum]
+    Inputs --> Probability[확률과 손실]
+    Algebra --> Verification[수치 기준 검증]
+    Probability --> Verification
+    Algebra --> Outputs[시각화 산출물]
+    Optimizers --> Outputs
+    Probability --> Outputs
+    Verification --> Reports[노트북과 실험 해설]
+    Outputs --> Reports
+```
+
 NumPy로 AI 학습의 수학적 기반을 직접 계산하고 Matplotlib으로 시각화한 실습 프로젝트입니다. 선형변환과 행렬 분해, 수치미분, 연쇄 법칙 기반 역전파, Gradient Descent, 확률분포와 손실 함수의 MLE 해석을 다룹니다.
 
 ## 한눈에 보는 학습 지도
@@ -59,18 +96,16 @@ flowchart LR
 ## 프로젝트 구조
 
 ```text
-src/
-  linear_algebra.py   # 행렬 변환, Power Iteration, SVD
-  calculus.py         # 중심차분, 수치 gradient, 등고선 시각화
-  optimizer.py        # VanillaGD, Momentum, 최적화 경로
-  probability.py      # 정규·베르누이 분포, Softmax
+src/model_learning_mechanics/
+  linear_algebra.py
+  calculus.py
+  optimizer.py
+  probability.py
+  outputs.py
+  verification.py
 notebooks/
-  backprop_derivation.ipynb
-  probability_loss.ipynb
-scripts/
-  generate_outputs.py
-  verify_submission_criteria.py  # 제출 수치 기준 콘솔 검증
 tests/
+assets/images/
 outputs/
 ```
 
@@ -79,34 +114,33 @@ outputs/
 Python 3.8 이상이 필요합니다.
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+make setup
+make check test smoke build
 ```
 
 전체 테스트를 실행합니다.
 
 ```bash
-MPLBACKEND=Agg python3 -m pytest -v
+MPLBACKEND=Agg uv run --frozen pytest -v
 ```
 
 모든 PNG 결과를 같은 입력과 seed로 다시 생성합니다.
 
 ```bash
-MPLBACKEND=Agg python3 scripts/generate_outputs.py
+MPLBACKEND=Agg uv run --frozen mechanics-generate
 ```
 
 면적비, Power Iteration, 수치미분, Softmax의 제출 기준을 콘솔에서 확인합니다.
 
 ```bash
-python3 scripts/verify_submission_criteria.py
+uv run --frozen mechanics-verify
 ```
 
 노트북의 계산과 출력도 처음부터 재실행할 수 있습니다.
 
 ```bash
-jupyter nbconvert --to notebook --execute --inplace notebooks/backprop_derivation.ipynb --ExecutePreprocessor.record_timing=False
-jupyter nbconvert --to notebook --execute --inplace notebooks/probability_loss.ipynb --ExecutePreprocessor.record_timing=False
+uv run --frozen jupyter nbconvert --to notebook --execute --inplace notebooks/backprop_derivation.ipynb --ExecutePreprocessor.record_timing=False
+uv run --frozen jupyter nbconvert --to notebook --execute --inplace notebooks/probability_loss.ipynb --ExecutePreprocessor.record_timing=False
 ```
 
 ## 실험 설명
@@ -118,7 +152,7 @@ jupyter nbconvert --to notebook --execute --inplace notebooks/probability_loss.i
 Power Iteration은 매 반복마다 $Av$를 정규화하고 Rayleigh quotient $v^TAv$로 최대 고유값을 추정합니다. 아래 전용 검증 스크립트는 면적비와 $|\det(A)|$의 상대오차(1% 이내), Power Iteration 고유값과 `np.linalg.eig` 기준값의 상대오차(5% 이내), 수치미분과 해석해의 절대오차($10^{-4}$ 이내), Softmax 출력 합의 1과의 차이($10^{-6}$ 이내)를 각 섹션의 기준과 수치로 출력합니다.
 
 ```text
-$ python3 scripts/verify_submission_criteria.py
+$ uv run --frozen mechanics-verify
 Submission criteria verification
 
 [1] Area ratio vs |det(A)| (relative error <= 1.00%)

@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 
-from src.probability import (
+from model_learning_mechanics.probability import (
     bernoulli_pmf,
     normal_pdf,
     plot_bernoulli_distributions,
@@ -65,9 +65,7 @@ def test_distribution_plots_include_both_requested_parameter_sets():
         "N(0, 1)",
         "N(2, 0.5)",
     }
-    legend_labels = {
-        text.get_text() for text in bernoulli_axes.get_legend().get_texts()
-    }
+    legend_labels = {text.get_text() for text in bernoulli_axes.get_legend().get_texts()}
     assert legend_labels == {"B(0.3)", "B(0.7)"}
     plt.close(normal_figure)
     plt.close(bernoulli_figure)

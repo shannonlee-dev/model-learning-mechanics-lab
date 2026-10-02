@@ -1,25 +1,24 @@
 """결정론적 입력으로 제출한 모든 시각화를 다시 생성합니다."""
 
 import os
-import sys
 import tempfile
 from pathlib import Path
 from typing import List
 
-REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 SVD_SOURCE_IMAGE = REPOSITORY_ROOT / "assets" / "images" / "svd_source.png"
+if not SVD_SOURCE_IMAGE.is_file():
+    SVD_SOURCE_IMAGE = Path(__file__).parent / "data" / "svd_source.png"
 os.environ.setdefault(
     "MPLCONFIGDIR",
     str(Path(tempfile.gettempdir()) / "model-learning-mechanics-matplotlib"),
 )
-if str(REPOSITORY_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPOSITORY_ROOT))
 
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 
-from src.calculus import plot_gradient_field  # noqa: E402
-from src.linear_algebra import (  # noqa: E402
+from model_learning_mechanics.calculus import plot_gradient_field  # noqa: E402
+from model_learning_mechanics.linear_algebra import (  # noqa: E402
     area_scale_error,
     plot_matrix_transform,
     plot_svd_reconstructions,
@@ -28,7 +27,7 @@ from src.linear_algebra import (  # noqa: E402
     shear_matrix,
     unit_circle,
 )
-from src.optimizer import (  # noqa: E402
+from model_learning_mechanics.optimizer import (  # noqa: E402
     Momentum,
     VanillaGD,
     elliptical,
@@ -39,7 +38,7 @@ from src.optimizer import (  # noqa: E402
     sphere,
     sphere_gradient,
 )
-from src.probability import (  # noqa: E402
+from model_learning_mechanics.probability import (  # noqa: E402
     plot_bernoulli_distributions,
     plot_normal_distributions,
 )
@@ -72,9 +71,7 @@ def _metric_summary(paths, metric, unit: str) -> str:
     for label, path in paths.items():
         values = np.asarray(metric(path), dtype=float)
         middle = values[len(values) // 2]
-        rows.append(
-            f"{label:<18} {values[0]:>10.2e} {middle:>10.2e} {values[-1]:>10.2e}"
-        )
+        rows.append(f"{label:<18} {values[0]:>10.2e} {middle:>10.2e} {values[-1]:>10.2e}")
     return f"{unit}\n" + "\n".join(rows)
 
 
@@ -154,7 +151,10 @@ def _learning_rate_stability_figure(convergent, divergent):
         title="Overshoot grows every step",
         ax=axes[1],
     )
-    distance = lambda points: np.linalg.norm(points, axis=1)
+
+    def distance(points):
+        return np.linalg.norm(points, axis=1)
+
     plot_path_metric(
         paths,
         metric=distance,
@@ -224,10 +224,7 @@ def generate_all_outputs(output_directory: Path) -> List[Path]:
     circle = unit_circle()
     for filename, matrix, title in transforms:
         determinant, ratio, error = area_scale_error(matrix, circle)
-        full_title = (
-            f"{title}\n"
-            f"det={determinant:.3f}, area ratio={ratio:.3f}, error={error:.2%}"
-        )
+        full_title = f"{title}\ndet={determinant:.3f}, area ratio={ratio:.3f}, error={error:.2%}"
         figure, _ = plot_matrix_transform(matrix, full_title, points=circle)
         generated.append(_save_figure(figure, destination / filename))
 
@@ -268,9 +265,7 @@ def generate_all_outputs(output_directory: Path) -> List[Path]:
             "while Vanilla GD contracts directly."
         ),
     )
-    generated.append(
-        _save_figure(optimizer_figure, destination / "optimizer_comparison.png")
-    )
+    generated.append(_save_figure(optimizer_figure, destination / "optimizer_comparison.png"))
 
     vanilla_elliptical = optimize(
         elliptical_gradient,
@@ -306,13 +301,20 @@ def generate_all_outputs(output_directory: Path) -> List[Path]:
     normal_figure, _ = plot_normal_distributions()
     generated.append(_save_figure(normal_figure, destination / "normal_distributions.png"))
     bernoulli_figure, _ = plot_bernoulli_distributions()
-    generated.append(
-        _save_figure(bernoulli_figure, destination / "bernoulli_distributions.png")
-    )
+    generated.append(_save_figure(bernoulli_figure, destination / "bernoulli_distributions.png"))
     return generated
 
 
+def main() -> None:
+    """Generate deterministic figures in the selected output directory."""
+    import argparse
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output-dir", type=Path, default=Path("outputs"))
+    args = parser.parse_args()
+    for result_path in generate_all_outputs(args.output_dir):
+        print(result_path)
+
+
 if __name__ == "__main__":
-    result_paths = generate_all_outputs(REPOSITORY_ROOT / "outputs")
-    for result_path in result_paths:
-        print(result_path.relative_to(REPOSITORY_ROOT))
+    main()
